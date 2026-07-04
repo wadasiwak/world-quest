@@ -155,6 +155,8 @@ export default function WorldMap() {
   const dailyScores = useGameStore((s) => s.dailyScores);
   const avatarId = useGameStore((s) => s.avatarId);
   const [showAvatarSelect, setShowAvatarSelect] = useState(false);
+  // Mobile bottom-sheet collapse (the handle only renders on small screens).
+  const [panelCollapsed, setPanelCollapsed] = useState(false);
 
   useEffect(() => {
     if (!mapDivRef.current) return;
@@ -292,11 +294,22 @@ export default function WorldMap() {
       map.on("click", (e) => {
         const state = useGameStore.getState().appState;
         if (state !== "WORLD_MAP" && state !== "POINTING") return;
-        const hits = map.queryRenderedFeatures(e.point, {
-          layers: ["country-marker", "country-fill"],
+        // Fat-finger tolerance for the tiny microstate markers (box query);
+        // polygons stay point-precise so border taps aren't misread.
+        const pad = 8;
+        const markerHits = map.queryRenderedFeatures(
+          [
+            [e.point.x - pad, e.point.y - pad],
+            [e.point.x + pad, e.point.y + pad],
+          ],
+          { layers: ["country-marker"] },
+        );
+        const fillHits = map.queryRenderedFeatures(e.point, {
+          layers: ["country-fill"],
         });
-        const iso = hits.length
-          ? ((hits[0].properties as { iso: string }).iso ?? null)
+        const hit = markerHits[0] ?? fillHits[0];
+        const iso = hit
+          ? ((hit.properties as { iso: string }).iso ?? null)
           : null;
         if (state === "WORLD_MAP") {
           useGameStore.getState().selectCountry(iso);
@@ -508,7 +521,18 @@ export default function WorldMap() {
   return (
     <div className="worldmap-wrap">
       {appState === "WORLD_MAP" && (
-        <div className="worldmap-panel">
+        <div
+          className={`worldmap-panel ${
+            panelCollapsed ? "worldmap-panel--collapsed" : ""
+          }`}
+        >
+          <button
+            className="panel-handle"
+            onClick={() => setPanelCollapsed((c) => !c)}
+            aria-label="toggle panel"
+          >
+            {panelCollapsed ? "⌃" : "⌄"}
+          </button>
           <div className="worldmap-banner">
             <div className="banner-top">
               <h1>{t("app_title")}</h1>

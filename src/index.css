@@ -28,8 +28,29 @@ body,
 .app {
   position: relative;
   height: 100vh;
+  /* Mobile browsers: track the *visible* viewport (URL bar collapse). */
+  height: 100dvh;
   width: 100vw;
   overflow: hidden;
+}
+
+button {
+  /* Kill the 300ms delay / double-tap zoom on touch for rapid quizzing. */
+  touch-action: manipulation;
+}
+
+/* Panel collapse handle — mobile only. */
+.panel-handle {
+  display: none;
+  font: inherit;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px 0 6px;
+  cursor: pointer;
+  width: 100%;
 }
 
 /* ---------- World map ---------- */
@@ -617,6 +638,12 @@ body,
 }
 
 /* ---------- Hover label ---------- */
+/* Touch devices get no mouseleave, so the label would stick around forever. */
+@media (hover: none) {
+  .map-hover-label {
+    display: none;
+  }
+}
 .map-hover-label {
   position: absolute;
   z-index: 4;
@@ -891,9 +918,17 @@ body,
 }
 .pointing-quit {
   position: absolute;
-  top: 16px;
-  left: 16px;
-  z-index: 6;
+  top: 6px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 16px;
+  padding: 6px;
+  cursor: pointer;
+}
+.pointing-quit:hover {
+  color: var(--text);
 }
 
 /* ---------- Flash quiz ---------- */
@@ -980,7 +1015,7 @@ body,
 
 /* ---------- Mobile ---------- */
 @media (max-width: 720px) {
-  /* Side panel becomes a bottom sheet so the map stays visible. */
+  /* Side panel becomes a collapsible bottom sheet so the map stays visible. */
   .worldmap-panel {
     top: auto;
     bottom: 0;
@@ -988,12 +1023,25 @@ body,
     right: 0;
     width: 100%;
     max-width: none;
-    max-height: 44vh;
-    padding: 10px 10px 12px;
+    max-height: 44dvh;
+    padding: 4px 10px calc(12px + env(safe-area-inset-bottom));
     background: rgba(14, 17, 22, 0.96);
     border-top: 1px solid #3a4657;
     border-radius: 16px 16px 0 0;
     box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+    transition: max-height 0.25s ease;
+  }
+  .panel-handle {
+    display: block;
+    position: sticky;
+    top: 0;
+    background: rgba(14, 17, 22, 0.96);
+    z-index: 1;
+  }
+  /* Collapsed: just the handle + banner peek out. */
+  .worldmap-panel--collapsed {
+    max-height: 190px;
+    overflow: hidden;
   }
   /* Country card moves to the top so the bottom sheet doesn't cover it. */
   .country-card {

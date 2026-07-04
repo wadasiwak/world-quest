@@ -165,10 +165,16 @@ export default function PointingGame({
 
   return (
     <>
-      <button className="btn btn--ghost btn--sm pointing-quit" onClick={goHome}>
-        {t("quit")}
-      </button>
       <div className="pointing-hud">
+        {/* Quit lives inside the HUD — a separate corner button gets covered
+            by the full-width HUD on phones. */}
+        <button
+          className="pointing-quit"
+          onClick={goHome}
+          aria-label={t("quit")}
+        >
+          ✕
+        </button>
         <div className="pointing-meta">
           <span>{modeTag}</span>
           <span>{t("pointing_round", { i: round + 1, n: targets.length })}</span>
