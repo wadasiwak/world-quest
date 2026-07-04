@@ -57,6 +57,19 @@ await page.screenshot({ path: `${shots}/2-country-card.png` });
 await page.locator(".country-card .btn--primary").click();
 await page.waitForSelector(".modal .choice-list");
 const correctByQuestion = new Map();
+let sawLevelUp = false;
+// The level-up overlay (z-40) intercepts clicks — screenshot it, then tap
+// to dismiss before touching the result modal underneath.
+const dismissLevelUp = async () => {
+  if (await page.locator(".levelup-backdrop").count()) {
+    if (!sawLevelUp) {
+      sawLevelUp = true;
+      await page.screenshot({ path: `${shots}/12-levelup.png` });
+    }
+    await page.locator(".levelup-backdrop").click();
+    await page.waitForTimeout(300);
+  }
+};
 const playQuiz = async () => {
   for (let q = 0; q < 3; q++) {
     const question = await page.locator(".modal h2").innerText();
@@ -74,6 +87,7 @@ const playQuiz = async () => {
     await page.waitForTimeout(300);
   }
   await page.waitForSelector(".modal--celebrate", { timeout: 5000 });
+  await dismissLevelUp();
   return page.locator(".modal--celebrate").innerText();
 };
 let resultText = await playQuiz();
@@ -83,6 +97,7 @@ if (resultText.includes("差一點")) {
   resultText = await playQuiz();
 }
 check("quiz collects country", resultText.includes("收集成功"));
+check("level-up animation fired", sawLevelUp);
 await page.screenshot({ path: `${shots}/3-quiz-result.png` });
 await page.locator(".modal--celebrate .btn").last().click();
 
@@ -160,13 +175,26 @@ check(
   (await page.locator(".quiz-meta").innerText()).includes("進階"),
 );
 await page.screenshot({ path: `${shots}/10-advanced.png` });
-await page.locator(".modal .btn--choice").first().click();
-await page.waitForSelector(".choice-result");
-await page.keyboard.press("Escape");
-await page.goto(BASE); // bail out of the quiz for the remaining checks
-await page.waitForFunction(() => window.__wqMap?.isStyleLoaded?.(), null, {
-  timeout: 30_000,
-});
+// Play the advanced quiz through (learn-then-retry, same as the base quiz).
+let advResult = await playQuiz();
+for (let i = 0; i < 2 && advResult.includes("差一點"); i++) {
+  await page.locator(".modal--celebrate .btn--primary").click(); // 再挑戰
+  await page.waitForSelector(".modal .choice-list");
+  advResult = await playQuiz();
+}
+check("advanced quiz cleared", advResult.includes("進階挑戰完成"));
+await page
+  .locator(".modal--celebrate .btn", { hasText: "回世界地圖" })
+  .click();
+// Cleared-advanced marks: ⭐ in the codex tile.
+await page.locator(".explore-row:has-text('圖鑑') .btn--primary").click();
+await page.waitForSelector(".codex-grid");
+const jpTile = await page
+  .locator(".codex-tile", { hasText: "日本" })
+  .innerText();
+check("codex shows advanced ⭐", jpTile.includes("⭐"));
+await page.screenshot({ path: `${shots}/13-codex-advanced.png` });
+await page.locator(".page-topbar .btn").click(); // back to map
 
 // --- knowledge page shows climate + travel tips for extras-backed country ---
 await page.locator(".explore-row:has-text('圖鑑') .btn--primary").click();

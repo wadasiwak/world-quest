@@ -5,6 +5,7 @@ import Codex from "./components/Codex";
 import KnowledgePanel from "./components/KnowledgePanel";
 import FlashQuiz from "./components/FlashQuiz";
 import ShapeGame from "./components/ShapeGame";
+import LevelUpOverlay from "./components/LevelUpOverlay";
 
 export default function App() {
   const appState = useGameStore((s) => s.appState);
@@ -19,6 +20,7 @@ export default function App() {
       {appState === "KNOWLEDGE" && <KnowledgePanel />}
       {appState === "FLASH" && <FlashQuiz />}
       {appState === "SHAPE" && <ShapeGame />}
+      <LevelUpOverlay />
     </div>
   );
 }

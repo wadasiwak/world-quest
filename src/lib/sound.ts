@@ -60,3 +60,10 @@ export function playCollect() {
 export function playClick() {
   tone(440, 0, 0.05, "triangle", 0.05);
 }
+
+/** Quick rising arpeggio for a level-up. */
+export function playLevelUp() {
+  tone(392, 0, 0.1);
+  tone(523, 0.08, 0.1);
+  tone(659, 0.16, 0.22);
+}

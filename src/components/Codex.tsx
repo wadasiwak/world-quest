@@ -8,7 +8,9 @@ export default function Codex() {
   const goHome = useGameStore((s) => s.goHome);
   const openKnowledge = useGameStore((s) => s.openKnowledge);
   const collectedCountryIds = useGameStore((s) => s.collectedCountryIds);
+  const advancedDoneIds = useGameStore((s) => s.advancedDoneIds);
   const collected = new Set(collectedCountryIds);
+  const advanced = new Set(advancedDoneIds);
 
   return (
     <div className="page">
@@ -36,7 +38,11 @@ export default function Codex() {
                   <button
                     key={c.id}
                     className={`codex-tile ${
-                      collected.has(c.id) ? "codex-tile--collected" : ""
+                      advanced.has(c.id)
+                        ? "codex-tile--advanced"
+                        : collected.has(c.id)
+                          ? "codex-tile--collected"
+                          : ""
                     }`}
                     onClick={() => openKnowledge(c.id)}
                   >
@@ -47,9 +53,11 @@ export default function Codex() {
                       </span>
                       <br />
                       <span className="codex-tile-status">
-                        {collected.has(c.id)
-                          ? t("collected_badge")
-                          : t("not_collected")}
+                        {advanced.has(c.id)
+                          ? `⭐ ${t("advanced_done")}`
+                          : collected.has(c.id)
+                            ? t("collected_badge")
+                            : t("not_collected")}
                       </span>
                     </span>
                   </button>

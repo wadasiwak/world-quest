@@ -58,8 +58,8 @@ const STRINGS: Record<string, LS> = {
     en: "Browse every country's intro and history",
   },
   map_hint: {
-    zh: "點地圖上的國家開始(金色=已收集)",
-    en: "Click a country on the map to begin (gold = collected)",
+    zh: "點地圖上的國家開始(金=已收集,橘=進階完成)",
+    en: "Click a country to begin (gold = collected, amber = advanced cleared)",
   },
   best: { zh: "最佳", en: "Best" },
   start_btn: { zh: "開始 →", en: "Start →" },
@@ -152,11 +152,8 @@ const STRINGS: Record<string, LS> = {
     en: "Their outfit evolves every 3 levels — from novice traveler all the way to legendary voyager!",
   },
   pick_btn: { zh: "就是你了!", en: "Let's go!" },
-  levelup_toast: { zh: "⬆️ 升級!Lv {l}", en: "⬆️ Level up! Lv {l}" },
-  tierup_toast: {
-    zh: "🎉 裝扮進化:{g} {t}!",
-    en: "🎉 Outfit upgraded: {g} {t}!",
-  },
+  levelup_head: { zh: "升級!", en: "LEVEL UP!" },
+  tierup_head: { zh: "裝扮進化!", en: "OUTFIT UPGRADE!" },
   daily_no_gain: {
     zh: "未超過今日最佳,這次不加分",
     en: "Didn't beat today's best — no points this time",

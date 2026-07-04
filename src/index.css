@@ -356,8 +356,169 @@ body,
   font-size: 18px;
   opacity: 0.85;
 }
-.toast--level {
-  bottom: 156px;
+/* ---------- Level-up celebration ---------- */
+.levelup-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  background: rgba(6, 9, 13, 0.72);
+  backdrop-filter: blur(3px);
+  overflow: hidden;
+  cursor: pointer;
+  animation: levelup-fade 0.25s ease;
+}
+@keyframes levelup-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.levelup-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 60px;
+  animation: levelup-pop 0.55s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+@keyframes levelup-pop {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.levelup-rays {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 340px;
+  height: 340px;
+  margin: -170px 0 0 -170px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    currentColor 0deg 9deg,
+    transparent 9deg 30deg
+  );
+  -webkit-mask-image: radial-gradient(circle, black 0%, transparent 68%);
+  mask-image: radial-gradient(circle, black 0%, transparent 68%);
+  opacity: 0.22;
+  animation: levelup-spin 7s linear infinite;
+  pointer-events: none;
+}
+@keyframes levelup-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.levelup-avatar {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: var(--panel);
+  display: grid;
+  place-items: center;
+  font-size: 52px;
+  animation: levelup-bounce 0.9s ease 0.25s both;
+}
+@keyframes levelup-bounce {
+  0% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-16px) scale(1.06);
+  }
+  55% {
+    transform: translateY(0) scale(1);
+  }
+  72% {
+    transform: translateY(-7px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+.levelup-gear {
+  position: absolute;
+  right: -8px;
+  bottom: -6px;
+  font-size: 30px;
+  animation: levelup-gear-pop 0.5s cubic-bezier(0.2, 1.8, 0.5, 1) 0.55s both;
+}
+@keyframes levelup-gear-pop {
+  0% {
+    transform: scale(0) rotate(-90deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+.levelup-head {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--text);
+  animation: levelup-rise 0.4s ease 0.35s both;
+}
+.levelup-level {
+  font-size: 44px;
+  font-weight: 900;
+  color: var(--accent);
+  text-shadow: 0 4px 18px rgba(255, 207, 77, 0.45);
+  animation: levelup-rise 0.4s ease 0.5s both;
+}
+.levelup-title {
+  font-size: 19px;
+  font-weight: 800;
+  animation: levelup-rise 0.45s ease 0.7s both;
+}
+@keyframes levelup-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.levelup-card--tier .levelup-avatar {
+  width: 116px;
+  height: 116px;
+  font-size: 64px;
+}
+.confetti {
+  position: absolute;
+  top: -18px;
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  opacity: 0.95;
+  animation-name: confetti-fall;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+  pointer-events: none;
+}
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(105vh) translateX(calc(var(--sway) * 90px))
+      rotate(660deg);
+    opacity: 0.7;
+  }
 }
 .advanced-chip {
   color: var(--accent);
@@ -600,6 +761,14 @@ body,
 .codex-tile--collected {
   border-color: rgba(255, 207, 77, 0.55);
   background: rgba(255, 207, 77, 0.07);
+}
+.codex-tile--advanced {
+  border-color: rgba(255, 150, 40, 0.8);
+  background: rgba(255, 150, 40, 0.1);
+  box-shadow: 0 0 10px rgba(255, 150, 40, 0.18);
+}
+.codex-tile--advanced .codex-tile-status {
+  color: #ff9628;
 }
 .codex-tile-flag {
   font-size: 24px;

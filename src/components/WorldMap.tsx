@@ -10,7 +10,7 @@ import {
   type GeoCountry,
 } from "../lib/countriesGeo";
 import { seededShuffle, todayKey } from "../lib/rng";
-import { playCollect, playCorrect } from "../lib/sound";
+import { playCollect } from "../lib/sound";
 import { levelInfo } from "../lib/leveling";
 import { avatarById, OUTFIT_TIERS, tierForLevel } from "../data/avatars";
 import CountryCard from "./CountryCard";
@@ -19,8 +19,11 @@ import CharacterSelect from "./CharacterSelect";
 
 const MAP_STYLE = "https://tiles.openfreemap.org/styles/dark";
 
+// Advanced-cleared countries burn a deeper amber than plain collected gold.
 const FILL_COLOR: maplibregl.ExpressionSpecification = [
   "case",
+  ["boolean", ["feature-state", "advanced"], false],
+  "rgba(255, 150, 40, 0.75)",
   ["boolean", ["feature-state", "collected"], false],
   "rgba(255, 207, 77, 0.60)",
   ["boolean", ["feature-state", "hover"], false],
@@ -32,6 +35,8 @@ const FILL_COLOR: maplibregl.ExpressionSpecification = [
 
 const LINE_COLOR: maplibregl.ExpressionSpecification = [
   "case",
+  ["boolean", ["feature-state", "advanced"], false],
+  "rgba(255, 150, 40, 1)",
   ["boolean", ["feature-state", "collected"], false],
   "rgba(255, 207, 77, 0.95)",
   "rgba(140, 155, 175, 0.45)",
@@ -150,7 +155,6 @@ export default function WorldMap() {
   const dailyScores = useGameStore((s) => s.dailyScores);
   const avatarId = useGameStore((s) => s.avatarId);
   const [showAvatarSelect, setShowAvatarSelect] = useState(false);
-  const [levelToast, setLevelToast] = useState<string | null>(null);
 
   useEffect(() => {
     if (!mapDivRef.current) return;
@@ -240,6 +244,8 @@ export default function WorldMap() {
           "circle-radius": 5,
           "circle-color": [
             "case",
+            ["boolean", ["feature-state", "advanced"], false],
+            "rgba(255, 150, 40, 1)",
             ["boolean", ["feature-state", "collected"], false],
             "rgba(255, 207, 77, 0.95)",
             "rgba(90, 140, 200, 0.9)",
@@ -346,28 +352,31 @@ export default function WorldMap() {
     }
   }, [appState, mapReady]);
 
-  // Paint collected / has-data states whenever progress changes.
+  // Paint collected / advanced / has-data states whenever progress changes.
+  const advancedDoneIds = useGameStore((s) => s.advancedDoneIds);
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapReady) return;
     const collected = new Set(collectedCountryIds);
+    const advanced = new Set(advancedDoneIds);
     for (const c of COUNTRIES) {
+      const state = {
+        collected: collected.has(c.id),
+        advanced: advanced.has(c.id),
+      };
       const polyId = polyIdByIsoRef.current.get(c.id);
       if (polyId !== undefined) {
         map.setFeatureState(
           { source: "countries", id: polyId },
-          { collected: collected.has(c.id), hasdata: true },
+          { ...state, hasdata: true },
         );
       }
       const markerId = markerIdByIsoRef.current.get(c.id);
       if (markerId !== undefined) {
-        map.setFeatureState(
-          { source: "country-markers", id: markerId },
-          { collected: collected.has(c.id) },
-        );
+        map.setFeatureState({ source: "country-markers", id: markerId }, state);
       }
     }
-  }, [collectedCountryIds, mapReady]);
+  }, [collectedCountryIds, advancedDoneIds, mapReady]);
 
   // Collection ceremony: fly to the freshly collected country, blink it,
   // toast, fanfare.
@@ -417,31 +426,7 @@ export default function WorldMap() {
   const xp = useGameStore((s) => s.xp);
   const xpInfo = levelInfo(xp);
   const avatar = avatarId ? avatarById(avatarId) : undefined;
-  const tier = tierForLevel(level);
-  const outfit = OUTFIT_TIERS[tier];
-
-  // Level-up / outfit-tier-up toast (separate from the collection toast).
-  const prevLevelRef = useRef(level);
-  useEffect(() => {
-    const prev = prevLevelRef.current;
-    prevLevelRef.current = level;
-    if (level <= prev) return;
-    const prevTier = tierForLevel(prev);
-    if (tier > prevTier) {
-      setLevelToast(
-        tr("tierup_toast", lang, {
-          g: outfit.gear,
-          t: L(outfit.title, lang),
-        }),
-      );
-      playCollect();
-    } else {
-      setLevelToast(tr("levelup_toast", lang, { l: level }));
-      playCorrect();
-    }
-    const timer = setTimeout(() => setLevelToast(null), 3500);
-    return () => clearTimeout(timer);
-  }, [level, tier, lang, outfit]);
+  const outfit = OUTFIT_TIERS[tierForLevel(level)];
 
   const startQuiz = useGameStore((s) => s.startQuiz);
   const openCodex = useGameStore((s) => s.openCodex);
@@ -753,9 +738,6 @@ export default function WorldMap() {
 
       {appState === "WORLD_MAP" && celebrateToast && (
         <div className="toast">{celebrateToast}</div>
-      )}
-      {appState === "WORLD_MAP" && levelToast && (
-        <div className="toast toast--level">{levelToast}</div>
       )}
 
       {appState === "WORLD_MAP" && (!avatarId || showAvatarSelect) && (
