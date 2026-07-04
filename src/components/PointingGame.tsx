@@ -52,6 +52,12 @@ export default function PointingGame({
   const recordedRef = useRef(false);
   // Best-before-this-run, so the result screen can detect a new record.
   const prevBestRef = useRef(mode === "world" ? bestPointingWorld : bestPointing);
+  // Daily replays only pay for improvement over today's best.
+  const dailyPrevRef = useRef(
+    mode === "daily"
+      ? (useGameStore.getState().dailyScores[todayKey()] ?? 0)
+      : 0,
+  );
 
   const target = targets[Math.min(round, targets.length - 1)];
 
@@ -120,7 +126,11 @@ export default function PointingGame({
         : t("pointing_classic");
 
   if (phase === "done") {
-    const isNewBest = mode !== "daily" && score > (prevBestRef.current ?? 0);
+    const isNewBest =
+      mode === "daily"
+        ? score > dailyPrevRef.current && dailyPrevRef.current > 0
+        : score > (prevBestRef.current ?? 0);
+    const dailyGain = Math.max(0, score - dailyPrevRef.current) * 20;
     return (
       <div className="modal-backdrop">
         <div className="modal modal--celebrate">
@@ -130,7 +140,12 @@ export default function PointingGame({
             {modeTag}
             <br />
             {t("pointing_score", { c: score, n: targets.length })}
-            <br />+{score * 20} {t("pts")}
+            <br />
+            {mode === "daily"
+              ? dailyGain > 0
+                ? t("daily_improved", { p: dailyGain })
+                : t("daily_no_gain")
+              : `+${score * 20} ${t("pts")}`}
             {isNewBest && (
               <>
                 <br />

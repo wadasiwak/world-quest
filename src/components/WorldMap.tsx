@@ -10,9 +10,12 @@ import {
   type GeoCountry,
 } from "../lib/countriesGeo";
 import { seededShuffle, todayKey } from "../lib/rng";
-import { playCollect } from "../lib/sound";
+import { playCollect, playCorrect } from "../lib/sound";
+import { levelInfo } from "../lib/leveling";
+import { avatarById, OUTFIT_TIERS, tierForLevel } from "../data/avatars";
 import CountryCard from "./CountryCard";
 import PointingGame, { type PointTarget } from "./PointingGame";
+import CharacterSelect from "./CharacterSelect";
 
 const MAP_STYLE = "https://tiles.openfreemap.org/styles/dark";
 
@@ -145,6 +148,9 @@ export default function WorldMap() {
   const bestShape = useGameStore((s) => s.bestShape);
   const bestFlash = useGameStore((s) => s.bestFlash);
   const dailyScores = useGameStore((s) => s.dailyScores);
+  const avatarId = useGameStore((s) => s.avatarId);
+  const [showAvatarSelect, setShowAvatarSelect] = useState(false);
+  const [levelToast, setLevelToast] = useState<string | null>(null);
 
   useEffect(() => {
     if (!mapDivRef.current) return;
@@ -409,7 +415,33 @@ export default function WorldMap() {
   const totalWithData = COUNTRIES.length;
   const collectedCount = collectedCountryIds.length;
   const xp = useGameStore((s) => s.xp);
-  const xpIntoLevel = xp % 300;
+  const xpInfo = levelInfo(xp);
+  const avatar = avatarId ? avatarById(avatarId) : undefined;
+  const tier = tierForLevel(level);
+  const outfit = OUTFIT_TIERS[tier];
+
+  // Level-up / outfit-tier-up toast (separate from the collection toast).
+  const prevLevelRef = useRef(level);
+  useEffect(() => {
+    const prev = prevLevelRef.current;
+    prevLevelRef.current = level;
+    if (level <= prev) return;
+    const prevTier = tierForLevel(prev);
+    if (tier > prevTier) {
+      setLevelToast(
+        tr("tierup_toast", lang, {
+          g: outfit.gear,
+          t: L(outfit.title, lang),
+        }),
+      );
+      playCollect();
+    } else {
+      setLevelToast(tr("levelup_toast", lang, { l: level }));
+      playCorrect();
+    }
+    const timer = setTimeout(() => setLevelToast(null), 3500);
+    return () => clearTimeout(timer);
+  }, [level, tier, lang, outfit]);
 
   const startQuiz = useGameStore((s) => s.startQuiz);
   const openCodex = useGameStore((s) => s.openCodex);
@@ -518,9 +550,30 @@ export default function WorldMap() {
             </div>
             <p>{t("subtitle")}</p>
             <div className="banner-score">
-              <span className="rpg-badge">
-                Lv {level} · {points} {t("pts")}
-              </span>
+              <button
+                className="avatar-chip"
+                onClick={() => setShowAvatarSelect(true)}
+                title={t("pick_avatar_title")}
+              >
+                <span
+                  className="avatar-circle"
+                  style={{ boxShadow: `0 0 0 2px ${outfit.ring}` }}
+                >
+                  {avatar?.emoji ?? "🙂"}
+                  <span className="avatar-gear">{outfit.gear}</span>
+                </span>
+                <span className="avatar-meta">
+                  <span
+                    className="avatar-title"
+                    style={{ color: outfit.ring }}
+                  >
+                    {L(outfit.title, lang)}
+                  </span>
+                  <span className="avatar-sub">
+                    Lv {level} · {points} {t("pts")}
+                  </span>
+                </span>
+              </button>
             </div>
           </div>
 
@@ -557,13 +610,17 @@ export default function WorldMap() {
               ))}
             </div>
             <div className="collect-progress-row">
-              <span>XP</span>
-              <strong>{xpIntoLevel} / 300</strong>
+              <span>
+                XP · Lv {xpInfo.level} → {xpInfo.level + 1}
+              </span>
+              <strong>
+                {xpInfo.into} / {xpInfo.need}
+              </strong>
             </div>
             <div className="xp-bar">
               <div
                 className="xp-fill"
-                style={{ width: `${(xpIntoLevel / 300) * 100}%` }}
+                style={{ width: `${(xpInfo.into / xpInfo.need) * 100}%` }}
               />
             </div>
           </div>
@@ -696,6 +753,13 @@ export default function WorldMap() {
 
       {appState === "WORLD_MAP" && celebrateToast && (
         <div className="toast">{celebrateToast}</div>
+      )}
+      {appState === "WORLD_MAP" && levelToast && (
+        <div className="toast toast--level">{levelToast}</div>
+      )}
+
+      {appState === "WORLD_MAP" && (!avatarId || showAvatarSelect) && (
+        <CharacterSelect onDone={() => setShowAvatarSelect(false)} />
       )}
 
       {appState === "POINTING" && pointingTargets.length > 0 && (

@@ -146,6 +146,25 @@ const STRINGS: Record<string, LS> = {
   prev_country: { zh: "← 上一國", en: "← Previous" },
   next_country: { zh: "下一國 →", en: "Next →" },
 
+  pick_avatar_title: { zh: "選擇你的旅伴", en: "Choose your travel companion" },
+  pick_avatar_sub: {
+    zh: "每升 3 級,旅伴的裝扮就會進化,一路從見習旅人變成傳奇旅人!",
+    en: "Their outfit evolves every 3 levels — from novice traveler all the way to legendary voyager!",
+  },
+  pick_btn: { zh: "就是你了!", en: "Let's go!" },
+  levelup_toast: { zh: "⬆️ 升級!Lv {l}", en: "⬆️ Level up! Lv {l}" },
+  tierup_toast: {
+    zh: "🎉 裝扮進化:{g} {t}!",
+    en: "🎉 Outfit upgraded: {g} {t}!",
+  },
+  daily_no_gain: {
+    zh: "未超過今日最佳,這次不加分",
+    en: "Didn't beat today's best — no points this time",
+  },
+  daily_improved: {
+    zh: "較今日最佳進步,+{p} 分",
+    en: "Beat today's best: +{p} pts",
+  },
   region_progress: { zh: "各洲進度", en: "Regions" },
   region_mastered: { zh: "🏆 {r}制霸!", en: "🏆 {r} mastered!" },
   collected_toast: { zh: "{f} {c} 已加入圖鑑!", en: "{f} {c} added to your codex!" },

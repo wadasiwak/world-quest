@@ -30,6 +30,18 @@ await page.waitForFunction(() => window.__wqMap?.isStyleLoaded?.(), null, {
 await page.waitForTimeout(1500);
 check("map loaded", true);
 check("side panel", await page.locator(".worldmap-panel").isVisible());
+
+// --- first-run character select blocks everything until a pick is made ---
+await page.waitForSelector(".avatar-grid");
+check("character select on first run", true);
+await page.screenshot({ path: `${shots}/0-character-select.png` });
+await page.locator(".avatar-option", { hasText: "狐狸" }).click();
+await page.locator(".modal--celebrate .btn--primary").click();
+await page.waitForSelector(".avatar-chip");
+check(
+  "avatar chip shows outfit title",
+  (await page.locator(".avatar-chip").innerText()).includes("見習旅人"),
+);
 await page.screenshot({ path: `${shots}/1-worldmap.png` });
 
 // --- click Japan → country card ---
@@ -189,6 +201,14 @@ const progress = await page
   .innerText();
 console.log("progress after reload:", progress);
 check("progress persisted", !progress.trim().startsWith("0 /"));
+check(
+  "avatar persisted (no re-select)",
+  (await page.locator(".avatar-grid").count()) === 0,
+);
+check(
+  "level advanced past 1 (non-linear curve)",
+  !(await page.locator(".avatar-chip").innerText()).includes("Lv 1 ·"),
+);
 
 // --- language toggle ---
 await page.locator(".lang-toggle button", { hasText: "EN" }).click();

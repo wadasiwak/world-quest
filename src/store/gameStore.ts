@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Lang } from "../i18n";
+import { levelInfo } from "../lib/leveling";
 
 export type AppState =
   | "WORLD_MAP"
@@ -13,7 +14,6 @@ export type AppState =
 
 export type PointingMode = "classic" | "world" | "daily";
 
-export const XP_PER_LEVEL = 300;
 /** Points per correct quiz answer / bonus for collecting a country. */
 export const POINTS_PER_CORRECT = 50;
 export const COLLECT_BONUS = 100;
@@ -35,6 +35,8 @@ interface GameState {
   dailyScores: Record<string, number>;
   lang: Lang;
   soundOn: boolean;
+  /** Chosen companion avatar; null until first pick. */
+  avatarId: string | null;
 
   // --- transient UI state ---
   appState: AppState;
@@ -51,6 +53,7 @@ interface GameState {
 
   setLang: (lang: Lang) => void;
   toggleSound: () => void;
+  setAvatar: (avatarId: string) => void;
   level: () => number;
   isCollected: (countryId: string) => boolean;
 
@@ -89,6 +92,7 @@ export const useGameStore = create<GameState>()(
       dailyScores: {},
       lang: "zh",
       soundOn: true,
+      avatarId: null,
 
       appState: "WORLD_MAP",
       pointingMode: "classic",
@@ -100,7 +104,8 @@ export const useGameStore = create<GameState>()(
 
       setLang: (lang) => set({ lang }),
       toggleSound: () => set((s) => ({ soundOn: !s.soundOn })),
-      level: () => Math.floor(get().xp / XP_PER_LEVEL) + 1,
+      setAvatar: (avatarId) => set({ avatarId }),
+      level: () => levelInfo(get().xp).level,
       isCollected: (id) => get().collectedCountryIds.includes(id),
 
       selectCountry: (countryId) => set({ selectedCountryId: countryId }),
@@ -175,15 +180,20 @@ export const useGameStore = create<GameState>()(
           xp: s.xp + score * 20,
         })),
 
+      // Replays only pay for improvement over today's best — no re-farming.
       recordDaily: (dateKey, score) =>
-        set((s) => ({
-          dailyScores: {
-            ...s.dailyScores,
-            [dateKey]: Math.max(score, s.dailyScores[dateKey] ?? 0),
-          },
-          points: s.points + score * 20,
-          xp: s.xp + score * 20,
-        })),
+        set((s) => {
+          const prev = s.dailyScores[dateKey] ?? 0;
+          const gained = Math.max(0, score - prev) * 20;
+          return {
+            dailyScores: {
+              ...s.dailyScores,
+              [dateKey]: Math.max(score, prev),
+            },
+            points: s.points + gained,
+            xp: s.xp + gained,
+          };
+        }),
 
       recordShape: (score) =>
         set((s) => ({
@@ -226,6 +236,7 @@ export const useGameStore = create<GameState>()(
         dailyScores: s.dailyScores,
         lang: s.lang,
         soundOn: s.soundOn,
+        avatarId: s.avatarId,
       }),
     },
   ),
