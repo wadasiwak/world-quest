@@ -146,6 +146,14 @@ const STRINGS: Record<string, LS> = {
   prev_country: { zh: "← 上一國", en: "← Previous" },
   next_country: { zh: "下一國 →", en: "Next →" },
 
+  xp_to_next: { zh: "距 Lv {l} 還需 {x} XP", en: "{x} XP to Lv {l}" },
+  stat_points: { zh: "總分", en: "Points" },
+  stat_collected: { zh: "已收集", en: "Collected" },
+  stat_advanced: { zh: "進階完成", en: "Advanced" },
+  stat_correct: { zh: "答對題數", en: "Correct answers" },
+  outfit_track: { zh: "裝扮進化之路", en: "Outfit journey" },
+  best_scores: { zh: "最佳成績", en: "Best scores" },
+  change_avatar: { zh: "更換旅伴", en: "Change companion" },
   pick_avatar_title: { zh: "選擇你的旅伴", en: "Choose your travel companion" },
   pick_avatar_sub: {
     zh: "每升 3 級,旅伴的裝扮就會進化,一路從見習旅人變成傳奇旅人!",

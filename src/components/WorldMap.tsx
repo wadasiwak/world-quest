@@ -16,6 +16,7 @@ import { avatarById, OUTFIT_TIERS, tierForLevel } from "../data/avatars";
 import CountryCard from "./CountryCard";
 import PointingGame, { type PointTarget } from "./PointingGame";
 import CharacterSelect from "./CharacterSelect";
+import ProfileCard from "./ProfileCard";
 
 const MAP_STYLE = "https://tiles.openfreemap.org/styles/dark";
 
@@ -155,6 +156,7 @@ export default function WorldMap() {
   const dailyScores = useGameStore((s) => s.dailyScores);
   const avatarId = useGameStore((s) => s.avatarId);
   const [showAvatarSelect, setShowAvatarSelect] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   // Mobile bottom-sheet collapse (the handle only renders on small screens).
   const [panelCollapsed, setPanelCollapsed] = useState(false);
 
@@ -561,8 +563,8 @@ export default function WorldMap() {
             <div className="banner-score">
               <button
                 className="avatar-chip"
-                onClick={() => setShowAvatarSelect(true)}
-                title={t("pick_avatar_title")}
+                onClick={() => setShowProfile(true)}
+                title={L(outfit.title, lang)}
               >
                 <span
                   className="avatar-circle"
@@ -764,8 +766,20 @@ export default function WorldMap() {
         <div className="toast">{celebrateToast}</div>
       )}
 
+      {appState === "WORLD_MAP" && showProfile && !showAvatarSelect && (
+        <ProfileCard
+          onClose={() => setShowProfile(false)}
+          onChangeAvatar={() => setShowAvatarSelect(true)}
+        />
+      )}
+
       {appState === "WORLD_MAP" && (!avatarId || showAvatarSelect) && (
-        <CharacterSelect onDone={() => setShowAvatarSelect(false)} />
+        <CharacterSelect
+          onDone={() => {
+            setShowAvatarSelect(false);
+            setShowProfile(false);
+          }}
+        />
       )}
 
       {appState === "POINTING" && pointingTargets.length > 0 && (
