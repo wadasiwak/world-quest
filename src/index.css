@@ -1,0 +1,774 @@
+:root {
+  --bg: #0e1116;
+  --panel: #171c24;
+  --panel-2: #1f2733;
+  --accent: #ffcf4d;
+  --accent-2: #05cb63;
+  --text: #e8edf3;
+  --muted: #9aa7b5;
+  --border: #2a333f;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  width: 100%;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.app {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* ---------- World map ---------- */
+.worldmap-wrap {
+  position: absolute;
+  inset: 0;
+}
+.worldmap {
+  position: absolute;
+  inset: 0;
+  /* MapLibre adds .maplibregl-map (position: relative) to this container,
+     overriding the absolute inset. Explicit size keeps it full-height. */
+  width: 100%;
+  height: 100%;
+}
+.worldmap-panel {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 5;
+  width: 330px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.worldmap-banner {
+  background: rgba(14, 17, 22, 0.9);
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+.worldmap-banner h1 {
+  margin: 0 0 4px;
+  font-size: 20px;
+  color: var(--text);
+}
+.worldmap-banner p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.banner-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.banner-score {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rpg-badge {
+  background: var(--accent);
+  color: #241c00;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.lang-toggle {
+  display: flex;
+  gap: 4px;
+}
+.lang-toggle button {
+  font: inherit;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.lang-toggle button.lang-on {
+  background: var(--panel-2);
+  color: var(--text);
+  border-color: #3a4657;
+}
+
+/* ---------- Progress ---------- */
+.collect-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.collect-progress-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+}
+.collect-progress-row strong {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.xp-bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.xp-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+/* ---------- Region progress ---------- */
+.region-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin: 2px 0;
+}
+.region-progress-row {
+  display: grid;
+  grid-template-columns: 72px 1fr 44px;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.region-progress-name {
+  white-space: nowrap;
+}
+.region-progress-bar {
+  height: 4px;
+}
+.region-progress-count {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Cards / rows ---------- */
+.explore-card {
+  background: rgba(14, 17, 22, 0.9);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.explore-card-head {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+}
+.explore-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.quest-row-title {
+  font-size: 13px;
+  font-weight: 600;
+}
+.quest-row-city {
+  font-size: 11px;
+  color: var(--muted);
+}
+.mode-best {
+  font-size: 11px;
+  color: var(--accent-2);
+}
+.roam-hint {
+  font-size: 11px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  font: inherit;
+  border-radius: 10px;
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    transform 0.05s ease,
+    background 0.15s ease;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn--primary {
+  background: var(--accent);
+  color: #241c00;
+  font-weight: 700;
+}
+.btn--choice {
+  background: var(--panel-2);
+  color: var(--text);
+  border-color: var(--border);
+  text-align: left;
+}
+.btn--choice:hover {
+  background: #27313e;
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--border);
+}
+.btn--ghost:hover {
+  color: var(--text);
+}
+.btn--right {
+  background: rgba(5, 203, 99, 0.25) !important;
+  border-color: var(--accent-2) !important;
+}
+.btn--wrongpick {
+  background: rgba(255, 90, 90, 0.2) !important;
+  border-color: #ff9b9b !important;
+}
+.btn--dim {
+  opacity: 0.5;
+}
+.btn--sm {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+.mode-btn-col {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.advanced-chip {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 11px;
+}
+.choice-list--flags {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.choice-list--flags .btn--choice {
+  flex: 1 1 calc(50% - 5px);
+  font-size: 40px;
+  text-align: center;
+  padding: 14px 0;
+  line-height: 1;
+}
+.shape-canvas-wrap {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.shape-canvas-wrap canvas {
+  max-width: 100%;
+}
+
+/* ---------- Country card (map click) ---------- */
+.country-card {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  width: min(400px, calc(100vw - 32px));
+  background: rgba(14, 17, 22, 0.94);
+  border: 1px solid #3a4657;
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  animation: card-in 0.18s ease;
+}
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+.country-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.country-card-flag {
+  font-size: 34px;
+  line-height: 1;
+}
+.country-card-name {
+  font-size: 17px;
+  font-weight: 700;
+}
+.country-card-sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+.country-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.country-card-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 16px;
+  cursor: pointer;
+}
+.collected-chip {
+  color: var(--accent-2);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+/* ---------- Hover label ---------- */
+.map-hover-label {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  background: rgba(14, 17, 22, 0.92);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  transform: translate(12px, -50%);
+  white-space: nowrap;
+}
+
+/* ---------- Modal (quiz) ---------- */
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  background: rgba(6, 9, 13, 0.66);
+  backdrop-filter: blur(2px);
+}
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  width: min(480px, 92vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+.modal h2 {
+  margin: 0;
+  color: var(--text);
+}
+.modal-intro {
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+.modal--celebrate {
+  text-align: center;
+  align-items: center;
+}
+.celebrate-badge {
+  font-size: 48px;
+}
+.choice-list,
+.choice-result {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.quiz-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+}
+.quiz-city {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+}
+.res-ok {
+  color: var(--accent-2);
+  font-weight: 700;
+  margin: 0;
+}
+.res-no {
+  color: #ff9b9b;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* ---------- Full-page views (codex / knowledge / flash) ---------- */
+.page {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: var(--bg);
+  overflow-y: auto;
+}
+.page-inner {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.page-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.page h1 {
+  margin: 0;
+  font-size: 24px;
+}
+.page-sub {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}
+
+/* ---------- Codex grid ---------- */
+.codex-region-head {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--muted);
+  margin: 10px 0 0;
+}
+.codex-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+.codex-tile {
+  font: inherit;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  color: var(--text);
+  text-align: left;
+}
+.codex-tile:hover {
+  background: var(--panel-2);
+}
+.codex-tile--collected {
+  border-color: rgba(255, 207, 77, 0.55);
+  background: rgba(255, 207, 77, 0.07);
+}
+.codex-tile-flag {
+  font-size: 24px;
+}
+.codex-tile-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+.codex-tile-status {
+  font-size: 11px;
+  color: var(--muted);
+}
+.codex-tile--collected .codex-tile-status {
+  color: var(--accent-2);
+}
+
+/* ---------- Knowledge page ---------- */
+.knowledge-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.knowledge-flag {
+  font-size: 56px;
+  line-height: 1;
+}
+.knowledge-title h1 {
+  margin: 0;
+}
+.knowledge-meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.knowledge-meta strong {
+  color: var(--text);
+}
+.knowledge-section {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+.knowledge-section h2 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  color: var(--accent);
+}
+.knowledge-section p {
+  margin: 0;
+  line-height: 1.75;
+  font-size: 14px;
+}
+.knowledge-city {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.knowledge-city:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.knowledge-city-name {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.knowledge-facts {
+  margin: 0;
+  padding-left: 20px;
+  line-height: 1.8;
+  font-size: 14px;
+}
+.knowledge-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* ---------- Pointing game HUD ---------- */
+.pointing-hud {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  background: rgba(14, 17, 22, 0.94);
+  border: 1px solid #3a4657;
+  border-radius: 14px;
+  padding: 14px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  min-width: 300px;
+  text-align: center;
+}
+.pointing-target {
+  font-size: 20px;
+  font-weight: 700;
+}
+.pointing-meta {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  gap: 14px;
+}
+.pointing-feedback {
+  font-size: 14px;
+  font-weight: 700;
+}
+.pointing-feedback--ok {
+  color: var(--accent-2);
+}
+.pointing-feedback--no {
+  color: #ff9b9b;
+}
+.pointing-quit {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 6;
+}
+
+/* ---------- Flash quiz ---------- */
+.flash-wrap {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.flash-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+.flash-timer {
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.flash-timer--low {
+  color: #ff9b9b;
+  animation: pulse-text 0.8s infinite;
+}
+@keyframes pulse-text {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+.flash-combo {
+  color: var(--accent);
+  font-weight: 700;
+}
+.flash-question {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 26px 20px;
+  text-align: center;
+}
+.flash-question-flag {
+  font-size: 64px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.flash-question-text {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* ---------- Toast ---------- */
+.toast {
+  position: absolute;
+  bottom: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 12;
+  background: rgba(14, 17, 22, 0.92);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+  animation: toast-in 0.2s ease;
+  pointer-events: none;
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 720px) {
+  /* Side panel becomes a bottom sheet so the map stays visible. */
+  .worldmap-panel {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: none;
+    max-height: 44vh;
+    padding: 10px 10px 12px;
+    background: rgba(14, 17, 22, 0.96);
+    border-top: 1px solid #3a4657;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+  }
+  /* Country card moves to the top so the bottom sheet doesn't cover it. */
+  .country-card {
+    bottom: auto;
+    top: 12px;
+  }
+  .toast {
+    bottom: auto;
+    top: 76px;
+  }
+  .pointing-hud {
+    min-width: 0;
+    width: calc(100vw - 24px);
+  }
+  .knowledge-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+/* ---------- Error overlay ---------- */
+.viewer-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 14px;
+  text-align: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 10;
+}
+.viewer-overlay--error {
+  color: #ff9b9b;
+}
