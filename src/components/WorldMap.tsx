@@ -752,6 +752,8 @@ export default function WorldMap() {
             </div>
             <div className="roam-hint">{t("map_hint")}</div>
           </div>
+
+          <div className="panel-copyright">{t("copyright")}</div>
         </div>
       )}
 

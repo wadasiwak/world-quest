@@ -185,6 +185,11 @@ const STRINGS: Record<string, LS> = {
   },
   flash_q_flag_rev: { zh: "{c} 的國旗是?", en: "Which flag is {c}'s?" },
 
+  copyright: {
+    zh: "© 2026 wadasiwak · 內容與程式碼未經授權禁止轉載",
+    en: "© 2026 wadasiwak. All rights reserved.",
+  },
+
   region_asia: { zh: "亞洲", en: "Asia" },
   region_europe: { zh: "歐洲", en: "Europe" },
   region_africa: { zh: "非洲", en: "Africa" },

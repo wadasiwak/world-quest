@@ -88,3 +88,24 @@ node scripts/e2e-check.mjs # Playwright + system Chrome, drives every mode end-t
 
 The dev/test hook `window.__wqMap` exposes the MapLibre map for geo→pixel
 clicks in e2e scripts.
+
+## 版權聲明 / Copyright
+
+© 2026 wadasiwak. All rights reserved.
+
+本專案的程式碼與內容（含題庫、國家介紹、歷史、氣候、旅遊提示等原創文字）
+均為 wadasiwak 所有,保留一切權利。未經授權,禁止轉載、重製、散布或商業使用。
+
+The source code and content of this project (including the quiz question
+banks and the original country intros, history, climate, and travel-tip
+texts) are © 2026 wadasiwak, all rights reserved. Unauthorized reproduction,
+redistribution, or commercial use is prohibited.
+
+Third-party data — 上述聲明不含下列第三方素材,其著作權與授權依原出處:
+
+- Basemap tiles & style: [OpenFreeMap](https://openfreemap.org/) ·
+  © [OpenMapTiles](https://openmaptiles.org/) ·
+  Data © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors
+  (shown in the in-map attribution control)
+- Country boundaries (`public/data/countries.geo.json`): derived from
+  [Natural Earth](https://www.naturalearthdata.com/) 110m (public domain)
