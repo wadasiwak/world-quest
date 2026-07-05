@@ -135,6 +135,9 @@ export default function WorldMap() {
   const [mapClick, setMapClick] = useState<MapClick | null>(null);
   const clickSeqRef = useRef(0);
   const [celebrateToast, setCelebrateToast] = useState<string | null>(null);
+  // Compass shows only while the view is rotated/tilted (Google Maps style).
+  const [bearing, setBearing] = useState(0);
+  const [viewTilted, setViewTilted] = useState(false);
 
   const t = useT();
   const lang = useGameStore((s) => s.lang);
@@ -182,6 +185,14 @@ export default function WorldMap() {
     mapRef.current = map;
 
     map.on("error", (e) => console.error("[map error]", e?.error ?? e));
+
+    const syncBearing = () => {
+      const b = map.getBearing();
+      setBearing(b);
+      setViewTilted(Math.abs(b) > 0.1 || map.getPitch() > 0.1);
+    };
+    map.on("rotate", syncBearing);
+    map.on("pitch", syncBearing);
 
     map.on("load", async () => {
       let geo: Awaited<ReturnType<typeof loadCountriesGeo>>;
@@ -745,6 +756,36 @@ export default function WorldMap() {
       )}
 
       <div ref={mapDivRef} className="worldmap" />
+
+      {viewTilted && (
+        <button
+          className="map-compass"
+          onClick={() =>
+            mapRef.current?.easeTo({ bearing: 0, pitch: 0, duration: 500 })
+          }
+          aria-label="reset north"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="26"
+            height="26"
+            style={{ transform: `rotate(${-bearing}deg)` }}
+          >
+            <path d="M12 2 L16 12 L8 12 Z" fill="#ff5f5f" />
+            <path d="M12 22 L16 12 L8 12 Z" fill="#aab4c3" />
+            <text
+              x="12"
+              y="8.2"
+              textAnchor="middle"
+              fontSize="5"
+              fontWeight="700"
+              fill="#0e1116"
+            >
+              N
+            </text>
+          </svg>
+        </button>
+      )}
 
       {hoverLabel && appState === "WORLD_MAP" && (
         <div

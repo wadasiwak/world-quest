@@ -1131,6 +1131,42 @@ button {
   }
 }
 
+/* ---------- Compass (visible only while the view is rotated/tilted) ---------- */
+.map-compass {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 6;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(14, 17, 22, 0.92);
+  border: 1px solid #3a4657;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+  animation: compass-in 0.2s ease;
+}
+@keyframes compass-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.map-compass:active {
+  transform: scale(0.94);
+}
+.map-compass svg {
+  display: block;
+  transition: transform 0.1s linear;
+}
+
 /* ---------- Mobile ---------- */
 @media (max-width: 720px) {
   /* Side panel becomes a collapsible bottom sheet so the map stays visible. */
@@ -1173,6 +1209,11 @@ button {
   .pointing-hud {
     min-width: 0;
     width: calc(100vw - 24px);
+  }
+  /* Below the top-centered pointing HUD / country card, above the bottom sheet. */
+  .map-compass {
+    top: 140px;
+    right: 12px;
   }
   .knowledge-head {
     flex-direction: column;
