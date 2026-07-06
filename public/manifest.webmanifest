@@ -1,0 +1,14 @@
+{
+  "name": "世界任務 World Quest",
+  "short_name": "世界任務",
+  "description": "答題收集世界 197 國!",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0e1116",
+  "theme_color": "#0e1116",
+  "icons": [
+    { "src": "./icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
