@@ -67,3 +67,13 @@ export function playLevelUp() {
   tone(523, 0.08, 0.1);
   tone(659, 0.16, 0.22);
 }
+
+/** Short triumphant fanfare for unlocking a badge. */
+export function playBadge() {
+  tone(587, 0, 0.12, "triangle");
+  tone(784, 0.1, 0.12, "triangle");
+  tone(988, 0.2, 0.12, "triangle");
+  // Closing chord.
+  tone(784, 0.34, 0.34, "sine", 0.08);
+  tone(1175, 0.34, 0.42, "sine", 0.1);
+}

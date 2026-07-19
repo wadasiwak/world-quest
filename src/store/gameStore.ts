@@ -33,6 +33,13 @@ interface GameState {
   bestFlash: number | null;
   /** Daily-challenge results keyed by YYYY-MM-DD. */
   dailyScores: Record<string, number>;
+  /**
+   * Badge ids whose unlock was already celebrated, in unlock order.
+   * Earned badges themselves are always re-derived from the save
+   * (lib/badges.ts) — only the "seen" flags persist, so the two can
+   * never fork.
+   */
+  badgesSeen: string[];
   lang: Lang;
   soundOn: boolean;
   /** Chosen companion avatar; null until first pick. */
@@ -50,6 +57,8 @@ interface GameState {
   knowledgeCountryId: string | null;
   /** Set when a country was just collected — drives the map celebration. */
   lastCollectedId: string | null;
+  /** True while the level-up overlay is on screen (badge overlay waits). */
+  levelUpShowing: boolean;
 
   setLang: (lang: Lang) => void;
   toggleSound: () => void;
@@ -74,6 +83,9 @@ interface GameState {
   recordShape: (score: number) => void;
   recordFlash: (score: number) => void;
   clearCelebration: () => void;
+  /** Record that these badge unlocks were celebrated (append-only). */
+  markBadgesSeen: (ids: string[]) => void;
+  setLevelUpShowing: (showing: boolean) => void;
   goHome: () => void;
   /** Wipe all saved progression (fresh start). Keeps lang + sound prefs. */
   resetProgress: () => void;
@@ -92,6 +104,7 @@ export const useGameStore = create<GameState>()(
       bestShape: null,
       bestFlash: null,
       dailyScores: {},
+      badgesSeen: [],
       lang: "zh",
       soundOn: true,
       avatarId: null,
@@ -103,6 +116,7 @@ export const useGameStore = create<GameState>()(
       quizAdvanced: false,
       knowledgeCountryId: null,
       lastCollectedId: null,
+      levelUpShowing: false,
 
       setLang: (lang) => set({ lang }),
       toggleSound: () => set((s) => ({ soundOn: !s.soundOn })),
@@ -213,6 +227,17 @@ export const useGameStore = create<GameState>()(
 
       clearCelebration: () => set({ lastCollectedId: null }),
 
+      // Appends preserve unlock order (badgesSeen doubles as chronology).
+      markBadgesSeen: (ids) =>
+        set((s) => {
+          const unseen = ids.filter((id) => !s.badgesSeen.includes(id));
+          return unseen.length
+            ? { badgesSeen: [...s.badgesSeen, ...unseen] }
+            : s;
+        }),
+
+      setLevelUpShowing: (showing) => set({ levelUpShowing: showing }),
+
       goHome: () =>
         set({
           appState: "WORLD_MAP",
@@ -236,6 +261,7 @@ export const useGameStore = create<GameState>()(
           bestShape: null,
           bestFlash: null,
           dailyScores: {},
+          badgesSeen: [],
           avatarId: null,
           selectedCountryId: null,
           lastCollectedId: null,
@@ -255,6 +281,7 @@ export const useGameStore = create<GameState>()(
         bestShape: s.bestShape,
         bestFlash: s.bestFlash,
         dailyScores: s.dailyScores,
+        badgesSeen: s.badgesSeen,
         lang: s.lang,
         soundOn: s.soundOn,
         avatarId: s.avatarId,

@@ -22,9 +22,16 @@ export default function LevelUpOverlay() {
   const lang = useGameStore((s) => s.lang);
   const level = useGameStore((s) => s.level());
   const avatarId = useGameStore((s) => s.avatarId);
+  const setLevelUpShowing = useGameStore((s) => s.setLevelUpShowing);
   const [show, setShow] = useState<Celebration | null>(null);
   const prevLevelRef = useRef(level);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Publish visibility so the badge-unlock overlay can wait its turn.
+  useEffect(() => {
+    setLevelUpShowing(show !== null);
+    return () => setLevelUpShowing(false);
+  }, [show, setLevelUpShowing]);
 
   useEffect(() => {
     const prev = prevLevelRef.current;

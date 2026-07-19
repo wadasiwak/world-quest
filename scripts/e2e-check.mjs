@@ -70,6 +70,23 @@ const dismissLevelUp = async () => {
     await page.waitForTimeout(300);
   }
 };
+// Badge celebrations wait for the level-up overlay to close, then pop —
+// dismiss them too or they block clicks on the modal underneath.
+let sawBadge = false;
+const dismissBadges = async () => {
+  try {
+    await page.waitForSelector(".badgeup-backdrop", { timeout: 1500 });
+  } catch {
+    return;
+  }
+  if (!sawBadge) {
+    sawBadge = true;
+    await page.waitForTimeout(700); // let the fade + medal pop-in land
+    await page.screenshot({ path: `${shots}/17-badge-first.png` });
+  }
+  await page.locator(".badgeup-backdrop").click();
+  await page.waitForTimeout(300);
+};
 const playQuiz = async () => {
   for (let q = 0; q < 3; q++) {
     const question = await page.locator(".modal h2").innerText();
@@ -88,6 +105,7 @@ const playQuiz = async () => {
   }
   await page.waitForSelector(".modal--celebrate", { timeout: 5000 });
   await dismissLevelUp();
+  await dismissBadges();
   return page.locator(".modal--celebrate").innerText();
 };
 let resultText = await playQuiz();
@@ -98,6 +116,7 @@ if (resultText.includes("差一點")) {
 }
 check("quiz collects country", resultText.includes("收集成功"));
 check("level-up animation fired", sawLevelUp);
+check("first-collect badge celebration fired", sawBadge);
 await page.screenshot({ path: `${shots}/3-quiz-result.png` });
 await page.locator(".modal--celebrate .btn").last().click();
 
@@ -311,6 +330,103 @@ check(
     .trim()
     .startsWith("0 /"),
 );
+
+// --- badge system: seed a veteran save → retro-award celebration on load ---
+// 100 collected (incl. 5 European microstates), 12 advanced clears, perfect
+// pointing/daily, 3-day streak, high shape/flash, 30k XP (≈Lv 13). Expected
+// earned set (12): first_collect, collect_10/50/100, daily_perfect,
+// daily_streak_3, pointing_perfect, shape_master, flash_master, advanced_10,
+// micro_5, level_10.
+const dayKey = (offset) => {
+  const d = new Date(Date.now() + offset * 86_400_000);
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+};
+const seedIds = await page.evaluate(async () => {
+  const gj = await (await fetch("/data/countries.geo.json")).json();
+  const micro = ["VAT", "MCO", "SMR", "LIE", "AND"];
+  const isos = [...new Set(gj.features.map((f) => f.properties.iso))].filter(
+    (i) => !micro.includes(i),
+  );
+  return [...micro, ...isos].slice(0, 100);
+});
+await page.evaluate(
+  ([ids, days]) =>
+    localStorage.setItem(
+      "world-quest-save",
+      JSON.stringify({
+        state: {
+          collectedCountryIds: ids,
+          advancedDoneIds: ids.slice(0, 12),
+          points: 30000,
+          xp: 30000,
+          correctAnswers: 300,
+          bestPointing: 10,
+          bestPointingWorld: 7,
+          bestShape: 9,
+          bestFlash: 250,
+          dailyScores: { [days[0]]: 9, [days[1]]: 8, [days[2]]: 10 },
+          badgesSeen: [],
+          lang: "zh",
+          soundOn: false,
+          avatarId: "fox",
+        },
+        version: 0,
+      }),
+    ),
+  [seedIds, [dayKey(-2), dayKey(-1), dayKey(0)]],
+);
+await page.goto(BASE);
+await page.waitForSelector(".badgeup-backdrop", { timeout: 15_000 });
+check("retro-award overlay fires on seeded save", true);
+await page.waitForTimeout(1200); // let medal pop-in animations land
+await page.screenshot({ path: `${shots}/18-badge-retro.png` });
+const medals = await page.locator(".badgeup-medal").count();
+check(`retro overlay shows 5 medals + overflow (${medals})`, medals === 6);
+check(
+  "overflow chip says +7",
+  (await page.locator(".badgeup-medal--extra").innerText()) === "+7",
+);
+await page.locator(".badgeup-backdrop").click();
+await page.waitForTimeout(400);
+
+// Seen-state persists: a reload must NOT re-celebrate the same badges.
+await page.goto(BASE);
+await page.waitForSelector(".avatar-chip");
+await page.waitForTimeout(1500);
+check(
+  "badges not re-celebrated after reload",
+  (await page.locator(".badgeup-backdrop").count()) === 0,
+);
+
+// Badge wall in the profile card: 23 tiles, 12 lit, locked ones show hints.
+await page.locator(".avatar-chip").click();
+await page.waitForSelector(".profile-card .badge-grid");
+check("badge wall has 23 tiles", (await page.locator(".badge-tile").count()) === 23);
+check(
+  "badge wall count reads 12/23",
+  (await page.locator(".badge-wall-count").innerText()).trim() === "12/23",
+);
+check(
+  "11 locked tiles grayed out",
+  (await page.locator(".badge-tile--locked").count()) === 11,
+);
+await page.locator(".badge-tile--locked").first().click();
+const detail = await page.locator(".badge-detail").innerText();
+check("locked badge shows its condition", detail.length > 6);
+await page.screenshot({ path: `${shots}/19-badge-wall.png` });
+
+// Share card now carries the recent-badges row — grab the PNG for eyeballing.
+// Headless Chrome claims canShare yet navigator.share() hangs, so stub it
+// out to force the desktop download fallback.
+await page.evaluate(() =>
+  Object.defineProperty(navigator, "canShare", { value: undefined }),
+);
+const dlPromise = page.waitForEvent("download", { timeout: 10_000 });
+await page.locator(".profile-card .share-btn").click();
+const dl = await dlPromise;
+await dl.saveAs(`${shots}/20-share-with-badges.png`);
+check("share card downloads with badges", true);
 
 await browser.close();
 console.log(fails.length ? `\nFAILED: ${fails.join(", ")}` : "\nall e2e checks passed ✓");

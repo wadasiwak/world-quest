@@ -217,6 +217,16 @@ const STRINGS: Record<string, LS> = {
     en: "🎉 All cleared! Replay any of them to review (no points)",
   },
 
+  // Badges
+  badge_wall: { zh: "成就徽章", en: "Badges" },
+  badge_hint: {
+    zh: "點徽章看達成條件(灰色=尚未取得)",
+    en: "Tap a badge to see how to earn it (gray = locked)",
+  },
+  badgeup_head: { zh: "新徽章!", en: "NEW BADGE!" },
+  badgeup_head_multi: { zh: "獲得新徽章!", en: "NEW BADGES!" },
+  share_badges: { zh: "成就徽章", en: "Badges" },
+
   // Share card
   share_btn: { zh: "📤 分享成就", en: "📤 Share" },
   share_img_tagline: {

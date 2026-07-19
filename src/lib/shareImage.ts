@@ -4,6 +4,8 @@
 // (navigator.share → LINE/IG direct); desktop falls back to a PNG download.
 import { COUNTRIES, countryById } from "../data/countries";
 import { avatarById, OUTFIT_TIERS, tierForLevel } from "../data/avatars";
+import { BADGES, badgeById } from "../data/badges";
+import { evaluateBadges, earnedByRecency } from "./badges";
 import { levelInfo } from "./leveling";
 import { useGameStore } from "../store/gameStore";
 import { tr, L, type Lang } from "../i18n";
@@ -29,6 +31,10 @@ interface ShareStats {
   total: number;
   flags: string[];
   bests: string[];
+  /** Most recently unlocked badge emojis (newest last, max 5). */
+  badgeEmojis: string[];
+  badgesEarned: number;
+  badgesTotal: number;
 }
 
 function roundRect(
@@ -159,6 +165,34 @@ function makeShareImage(s: ShareStats): Promise<Blob> {
     }
   }
 
+  // Recently unlocked badges: gold-ringed medallions in a centered row.
+  if (s.badgeEmojis.length) {
+    ctx.fillStyle = "#9aa7b5";
+    ctx.font = `24px ${FONT}`;
+    ctx.fillText(
+      `${tr("share_badges", s.lang)} ${s.badgesEarned}/${s.badgesTotal}`,
+      W / 2,
+      946,
+    );
+    const r = 34;
+    const gap = 88;
+    const cy = 1004;
+    const x0 = W / 2 - ((s.badgeEmojis.length - 1) * gap) / 2;
+    for (let i = 0; i < s.badgeEmojis.length; i++) {
+      const cx = x0 + i * gap;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = "#1f2733";
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#ffcf4d";
+      ctx.stroke();
+      ctx.fillStyle = "#e8edf3";
+      ctx.font = `36px ${FONT}`;
+      ctx.fillText(s.badgeEmojis[i], cx, cy + 13);
+    }
+  }
+
   // Best scores, one small line.
   if (s.bests.length) {
     ctx.fillStyle = "#9aa7b5";
@@ -166,7 +200,7 @@ function makeShareImage(s: ShareStats): Promise<Blob> {
     ctx.fillText(
       `${tr("best_scores", s.lang)} · ${s.bests.join("   ")}`,
       W / 2,
-      1010,
+      1066,
     );
   }
 
@@ -220,6 +254,13 @@ export async function shareAchievement(): Promise<void> {
   if (s.bestShape !== null) bests.push(`🧩 ${s.bestShape}/10`);
   if (s.bestFlash !== null) bests.push(`⚡ ${s.bestFlash}`);
 
+  // Up to 5 most recently unlocked badges (badgesSeen keeps unlock order).
+  const earned = evaluateBadges(s);
+  const badgeEmojis = earnedByRecency(earned, s.badgesSeen)
+    .slice(-5)
+    .map((id) => badgeById(id)?.emoji)
+    .filter((e): e is string => !!e);
+
   const blob = await makeShareImage({
     lang: s.lang,
     avatarEmoji: s.avatarId ? (avatarById(s.avatarId)?.emoji ?? "🙂") : "🙂",
@@ -232,6 +273,9 @@ export async function shareAchievement(): Promise<void> {
     total: COUNTRIES.length,
     flags,
     bests,
+    badgeEmojis,
+    badgesEarned: earned.length,
+    badgesTotal: BADGES.length,
   });
   await shareOrDownload(blob, "world-quest-achievement.png");
 }

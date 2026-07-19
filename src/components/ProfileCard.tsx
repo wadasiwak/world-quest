@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { COUNTRIES } from "../data/countries";
 import {
   avatarById,
@@ -6,6 +6,8 @@ import {
   tierForLevel,
   LEVELS_PER_TIER,
 } from "../data/avatars";
+import { BADGES } from "../data/badges";
+import { evaluateBadges } from "../lib/badges";
 import { levelInfo } from "../lib/leveling";
 import { shareAchievement } from "../lib/shareImage";
 import { useGameStore } from "../store/gameStore";
@@ -25,15 +27,46 @@ export default function ProfileCard({ onClose, onChangeAvatar }: Props) {
   const points = useGameStore((s) => s.points);
   const xp = useGameStore((s) => s.xp);
   const correctAnswers = useGameStore((s) => s.correctAnswers);
-  const collectedCount = useGameStore((s) => s.collectedCountryIds.length);
-  const advancedCount = useGameStore((s) => s.advancedDoneIds.length);
+  const collectedCountryIds = useGameStore((s) => s.collectedCountryIds);
+  const advancedDoneIds = useGameStore((s) => s.advancedDoneIds);
   const bestPointing = useGameStore((s) => s.bestPointing);
   const bestPointingWorld = useGameStore((s) => s.bestPointingWorld);
   const bestShape = useGameStore((s) => s.bestShape);
   const bestFlash = useGameStore((s) => s.bestFlash);
-  const todayScore = useGameStore((s) => s.dailyScores[todayKey()]);
+  const dailyScores = useGameStore((s) => s.dailyScores);
+  const todayScore = dailyScores[todayKey()];
   const resetProgress = useGameStore((s) => s.resetProgress);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [pickedBadge, setPickedBadge] = useState<string | null>(null);
+  const collectedCount = collectedCountryIds.length;
+  const advancedCount = advancedDoneIds.length;
+
+  const earnedBadges = useMemo(
+    () =>
+      new Set(
+        evaluateBadges({
+          collectedCountryIds,
+          advancedDoneIds,
+          xp,
+          bestPointing,
+          bestPointingWorld,
+          bestShape,
+          bestFlash,
+          dailyScores,
+        }),
+      ),
+    [
+      collectedCountryIds,
+      advancedDoneIds,
+      xp,
+      bestPointing,
+      bestPointingWorld,
+      bestShape,
+      bestFlash,
+      dailyScores,
+    ],
+  );
+  const picked = BADGES.find((b) => b.id === pickedBadge);
 
   const info = levelInfo(xp);
   const tier = tierForLevel(info.level);
@@ -135,6 +168,47 @@ export default function ProfileCard({ onClose, onChangeAvatar }: Props) {
                 </span>
               </div>
             ))}
+          </div>
+        </div>
+
+        <div className="profile-track">
+          <div className="explore-card-head">
+            {t("badge_wall")}{" "}
+            <span className="badge-wall-count">
+              {earnedBadges.size}/{BADGES.length}
+            </span>
+          </div>
+          <div className="badge-grid">
+            {BADGES.map((b) => {
+              const earned = earnedBadges.has(b.id);
+              return (
+                <button
+                  key={b.id}
+                  className={`badge-tile ${earned ? "" : "badge-tile--locked"} ${
+                    pickedBadge === b.id ? "badge-tile--picked" : ""
+                  }`}
+                  title={`${L(b.name, lang)} — ${L(b.desc, lang)}`}
+                  onClick={() =>
+                    setPickedBadge(pickedBadge === b.id ? null : b.id)
+                  }
+                >
+                  {b.emoji}
+                </button>
+              );
+            })}
+          </div>
+          <div className="badge-detail">
+            {picked ? (
+              <>
+                <strong>
+                  {picked.emoji} {L(picked.name, lang)}
+                </strong>{" "}
+                — {L(picked.desc, lang)}
+                {earnedBadges.has(picked.id) && " ✓"}
+              </>
+            ) : (
+              t("badge_hint")
+            )}
           </div>
         </div>
 
