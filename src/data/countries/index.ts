@@ -16,15 +16,39 @@ import { AMERICAS_MORE2 } from "./americas_more2";
 import { OCEANIA } from "./oceania";
 import { OCEANIA_MORE } from "./oceania_more";
 import { ASIA_EXTRAS } from "../extras/asia";
+import { ASIA_MORE1_EXTRAS } from "../extras/asia_more1";
+import { ASIA_MORE2_EXTRAS } from "../extras/asia_more2";
+import { ASIA_MORE3_EXTRAS } from "../extras/asia_more3";
 import { EUROPE_EXTRAS } from "../extras/europe";
+import { EUROPE_MORE1_EXTRAS } from "../extras/europe_more1";
+import { EUROPE_MORE2_EXTRAS } from "../extras/europe_more2";
 import { AMERICAS_EXTRAS } from "../extras/americas";
+import { AMERICAS_MORE1_EXTRAS } from "../extras/americas_more1";
+import { AMERICAS_MORE2_EXTRAS } from "../extras/americas_more2";
 import { AFRICA_OCEANIA_EXTRAS } from "../extras/africa_oceania";
+import { AFRICA_MORE1_EXTRAS } from "../extras/africa_more1";
+import { AFRICA_MORE2_EXTRAS } from "../extras/africa_more2";
+import { AFRICA_MORE3_EXTRAS } from "../extras/africa_more3";
+import { AFRICA_MORE4_EXTRAS } from "../extras/africa_more4";
+import { OCEANIA_MORE_EXTRAS } from "../extras/oceania_more";
 
 const EXTRAS = {
   ...ASIA_EXTRAS,
+  ...ASIA_MORE1_EXTRAS,
+  ...ASIA_MORE2_EXTRAS,
+  ...ASIA_MORE3_EXTRAS,
   ...EUROPE_EXTRAS,
+  ...EUROPE_MORE1_EXTRAS,
+  ...EUROPE_MORE2_EXTRAS,
   ...AMERICAS_EXTRAS,
+  ...AMERICAS_MORE1_EXTRAS,
+  ...AMERICAS_MORE2_EXTRAS,
   ...AFRICA_OCEANIA_EXTRAS,
+  ...AFRICA_MORE1_EXTRAS,
+  ...AFRICA_MORE2_EXTRAS,
+  ...AFRICA_MORE3_EXTRAS,
+  ...AFRICA_MORE4_EXTRAS,
+  ...OCEANIA_MORE_EXTRAS,
 };
 
 // Extras (climate / travel tips written after the base content) merge into

@@ -134,16 +134,26 @@ for (const c of countries) {
   }
 }
 
-// Extras: climate/travelTips/extraQuiz for pre-existing countries.
+// Extras: extraQuiz for every country; climate/travelTips only for
+// countries whose base entry doesn't carry them inline.
 const extras = await loadExtras();
 const countryIds = new Set(countries.map((c) => c.id));
+const countryById = new Map(countries.map((c) => [c.id, c]));
 for (const [id, ex] of Object.entries(extras)) {
   const p = `extras/${id}`;
   if (!countryIds.has(id)) errors.push(`${p}: unknown country id`);
-  checkLS(ex.climate, `${p}.climate`);
-  if (!Array.isArray(ex.travelTips) || ex.travelTips.length < 2)
-    errors.push(`${p}: needs 2+ travelTips`);
-  else ex.travelTips.forEach((tip, i) => checkLS(tip, `${p}.travelTips[${i}]`));
+  const base = countryById.get(id);
+  if (ex.climate) checkLS(ex.climate, `${p}.climate`);
+  else if (base && !base.climate)
+    errors.push(`${p}: no climate here nor inline`);
+  if (ex.travelTips) {
+    if (!Array.isArray(ex.travelTips) || ex.travelTips.length < 2)
+      errors.push(`${p}: needs 2+ travelTips`);
+    else
+      ex.travelTips.forEach((tip, i) => checkLS(tip, `${p}.travelTips[${i}]`));
+  } else if (base && !(base.travelTips?.length >= 2)) {
+    errors.push(`${p}: no travelTips here nor inline`);
+  }
   if (!Array.isArray(ex.extraQuiz) || ex.extraQuiz.length !== 3)
     errors.push(`${p}: expected 3 extraQuiz, got ${ex.extraQuiz?.length}`);
   else
@@ -163,10 +173,18 @@ for (const [id, ex] of Object.entries(extras)) {
     }
 }
 // Countries still missing climate/tips from either source.
-const noClimate = countries.filter((c) => !c.climate && !extras[c.id]);
+const noClimate = countries.filter((c) => !c.climate && !extras[c.id]?.climate);
 if (noClimate.length)
   warnings.push(
     `${noClimate.length} countries missing climate/travelTips: ${noClimate
+      .map((c) => c.id)
+      .join(",")}`,
+  );
+// Countries still missing an advanced question bank.
+const noQuiz = countries.filter((c) => !extras[c.id]?.extraQuiz?.length);
+if (noQuiz.length)
+  warnings.push(
+    `${noQuiz.length} countries missing extraQuiz: ${noQuiz
       .map((c) => c.id)
       .join(",")}`,
   );

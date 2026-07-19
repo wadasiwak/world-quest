@@ -44,13 +44,14 @@ export interface Country {
 }
 
 /**
- * Supplementary content for countries whose base entry predates these
- * fields — merged into Country at load (see countries/index.ts).
+ * Supplementary content merged into Country at load (see countries/index.ts).
  * extraQuiz is the country-level advanced question bank (3 questions),
- * unlocked after the country is collected.
+ * unlocked after the country is collected. climate/travelTips are only
+ * needed for countries whose base entry predates those fields — newer
+ * country files carry them inline, so their extras are quiz-only.
  */
 export interface CountryExtras {
-  climate: LS;
-  travelTips: LS[];
+  climate?: LS;
+  travelTips?: LS[];
   extraQuiz: Trivia[];
 }

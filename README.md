@@ -20,8 +20,8 @@ with the app (the only network dependency is the OpenFreeMap dark basemap).
 - **答題收集 Collect** — click a country (or hit 隨機挑戰) and answer 3
   questions about its cities. 2+ correct collects it: the map turns gold, the
   camera flies in, fanfare plays. Completing a whole region earns a 🏆.
-- **進階挑戰 Advanced quiz** — collected countries (the original 61) unlock a
-  harder country-level question bank for bonus points, once.
+- **進階挑戰 Advanced quiz** — every collected country unlocks a harder
+  country-level question bank for bonus points, once.
 - **地圖指認 Find-the-country** — 10 rounds of "click Brazil". Three flavors:
   **經典** (content countries), **全世界** (all 177 map polygons), and a
   **每日挑戰** with a date-seeded set shared by everyone. Basemap labels and
@@ -47,7 +47,7 @@ src/
   data/
     types.ts                     # Country / CountryCity / Trivia / CountryExtras
     countries/*.ts               # 197 countries, one file per continent batch
-    extras/*.ts                  # climate + travelTips + advanced quiz for the first 61
+    extras/*.ts                  # advanced quiz for all 197 (+ climate/tips for the first 61)
   lib/
     countriesGeo.ts              # cached GeoJSON loader + centroids + iso2→emoji
     rng.ts                       # seeded shuffle (daily challenge)
@@ -82,7 +82,7 @@ touching content, run:
 
 ```bash
 npm run check              # ids ↔ GeoJSON, 3 cities × 4 options, bilingual completeness,
-                           # extras shape (3 advanced questions, climate, 2+ tips)
+                           # extras shape (3 advanced questions each, climate/tips coverage)
 node scripts/e2e-check.mjs # Playwright + system Chrome, drives every mode end-to-end
 ```
 
