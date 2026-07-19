@@ -185,6 +185,54 @@ const STRINGS: Record<string, LS> = {
   },
   flash_q_flag_rev: { zh: "{c} 的國旗是?", en: "Which flag is {c}'s?" },
 
+  // Country search panel
+  search_head: { zh: "🔍 尋找國家", en: "🔍 Find a country" },
+  search_placeholder: {
+    zh: "輸入國名(中英文皆可)…",
+    en: "Type a country name (中/EN)…",
+  },
+  search_count: { zh: "{n} 國", en: "{n}" },
+  filter_all: { zh: "全部", en: "All" },
+  filter_collected: { zh: "已收集", en: "Collected" },
+  filter_uncollected: { zh: "未收集", en: "Not yet" },
+  search_none: { zh: "找不到符合的國家", en: "No matching countries" },
+
+  // Advanced challenge entry
+  mode_advanced: { zh: "⭐ 進階挑戰", en: "⭐ Advanced challenge" },
+  mode_advanced_desc: {
+    zh: "挑戰已收集國家的高難度題庫",
+    en: "Harder quizzes for countries you've collected",
+  },
+  advanced_todo: { zh: "可挑戰 {n} 國", en: "{n} to challenge" },
+  advanced_pick_sub: {
+    zh: "從已收集的國家挑一國直接開戰(共 {n} 國提供進階題庫)",
+    en: "Pick a collected country to start ({n} countries have an advanced bank)",
+  },
+  advanced_pick_empty: {
+    zh: "還沒有可挑戰的國家——先在地圖上答題收集,收集到提供進階題庫的國家後,就會出現在這裡!",
+    en: "Nothing to challenge yet — collect countries on the map first; collected countries with an advanced bank will show up here!",
+  },
+  advanced_pick_all_done: {
+    zh: "🎉 全部完成!可重玩複習(不再計分)",
+    en: "🎉 All cleared! Replay any of them to review (no points)",
+  },
+
+  // Share card
+  share_btn: { zh: "📤 分享成就", en: "📤 Share" },
+  share_img_tagline: {
+    zh: "答題收集世界 197 國",
+    en: "Collect all 197 countries",
+  },
+
+  // Reset progress
+  reset_btn: { zh: "🗑️ 重置進度", en: "🗑️ Reset progress" },
+  reset_warn: {
+    zh: "確定要重置?所有收集進度、分數與最佳成績將全部清除,無法復原。",
+    en: "Reset everything? All collected countries, points, and best scores will be permanently erased.",
+  },
+  reset_confirm: { zh: "確定重置", en: "Yes, reset" },
+  reset_cancel: { zh: "取消", en: "Cancel" },
+
   copyright: {
     zh: "© 2026 wadasiwak · 內容與程式碼未經授權禁止轉載",
     en: "© 2026 wadasiwak. All rights reserved.",

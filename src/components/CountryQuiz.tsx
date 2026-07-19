@@ -7,6 +7,7 @@ import {
   COLLECT_BONUS,
 } from "../store/gameStore";
 import { playCorrect, playWrong } from "../lib/sound";
+import { shareAchievement } from "../lib/shareImage";
 import { useT, L } from "../i18n";
 
 type Phase = "question" | "feedback" | "result";
@@ -184,6 +185,14 @@ export default function CountryQuiz() {
             >
               📖 {t("read_after", { c: L(country.name, lang) })}
             </button>
+            {succeeded && (
+              <button
+                className="btn btn--ghost share-btn"
+                onClick={() => void shareAchievement().catch(console.error)}
+              >
+                {t("share_btn")}
+              </button>
+            )}
             <button className="btn btn--ghost" onClick={goHome}>
               {t("back_to_map")}
             </button>

@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { COUNTRIES, countryById, REGION_ORDER } from "../data/countries";
+import {
+  COUNTRIES,
+  countryById,
+  extraQuizFor,
+  REGION_ORDER,
+} from "../data/countries";
 import { useGameStore, type PointingMode } from "../store/gameStore";
 import { useT, L, tr, type LS } from "../i18n";
 import {
@@ -14,6 +19,8 @@ import { playCollect } from "../lib/sound";
 import { levelInfo } from "../lib/leveling";
 import { avatarById, OUTFIT_TIERS, tierForLevel } from "../data/avatars";
 import CountryCard from "./CountryCard";
+import CountrySearch from "./CountrySearch";
+import AdvancedPicker from "./AdvancedPicker";
 import PointingGame, { type PointTarget } from "./PointingGame";
 import CharacterSelect from "./CharacterSelect";
 import ProfileCard from "./ProfileCard";
@@ -160,6 +167,7 @@ export default function WorldMap() {
   const avatarId = useGameStore((s) => s.avatarId);
   const [showAvatarSelect, setShowAvatarSelect] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [showAdvancedPicker, setShowAdvancedPicker] = useState(false);
   // Mobile bottom-sheet collapse (the handle only renders on small screens).
   const [panelCollapsed, setPanelCollapsed] = useState(false);
 
@@ -521,6 +529,27 @@ export default function WorldMap() {
     }
   }, []);
 
+  // Search-panel pick: fly the camera in and open the country card.
+  const flyToCountry = useCallback((iso: string) => {
+    const map = mapRef.current;
+    const country = countryById(iso);
+    if (!map || !country) return;
+    map.flyTo({
+      center: [country.center.lng, country.center.lat],
+      zoom: 4,
+      duration: 1200,
+    });
+    useGameStore.getState().selectCountry(iso);
+  }, []);
+
+  // Collected countries with an advanced bank still waiting to be cleared.
+  const advancedTodoCount = useMemo(() => {
+    const done = new Set(advancedDoneIds);
+    return collectedCountryIds.filter(
+      (id) => extraQuizFor(id) && !done.has(id),
+    ).length;
+  }, [collectedCountryIds, advancedDoneIds]);
+
   const randomChallenge = () => {
     const pool = COUNTRIES.filter(
       (c) => !collectedCountryIds.includes(c.id),
@@ -663,6 +692,23 @@ export default function WorldMap() {
             </div>
             <div className="explore-row">
               <div>
+                <div className="quest-row-title">{t("mode_advanced")}</div>
+                <div className="quest-row-city">{t("mode_advanced_desc")}</div>
+                {advancedTodoCount > 0 && (
+                  <div className="mode-best">
+                    {t("advanced_todo", { n: advancedTodoCount })}
+                  </div>
+                )}
+              </div>
+              <button
+                className="btn btn--primary btn--sm"
+                onClick={() => setShowAdvancedPicker(true)}
+              >
+                {t("start_btn")}
+              </button>
+            </div>
+            <div className="explore-row">
+              <div>
                 <div className="quest-row-title">{t("mode_pointing")}</div>
                 <div className="quest-row-city">{t("mode_pointing_desc")}</div>
                 {(bestPointing !== null || bestPointingWorld !== null) && (
@@ -739,6 +785,8 @@ export default function WorldMap() {
             </div>
           </div>
 
+          <CountrySearch onPick={flyToCountry} />
+
           <div className="explore-card">
             <div className="explore-card-head">{t("knowledge_head")}</div>
             <div className="explore-row">
@@ -807,6 +855,10 @@ export default function WorldMap() {
 
       {appState === "WORLD_MAP" && celebrateToast && (
         <div className="toast">{celebrateToast}</div>
+      )}
+
+      {appState === "WORLD_MAP" && showAdvancedPicker && (
+        <AdvancedPicker onClose={() => setShowAdvancedPicker(false)} />
       )}
 
       {appState === "WORLD_MAP" && showProfile && !showAvatarSelect && (

@@ -75,6 +75,8 @@ interface GameState {
   recordFlash: (score: number) => void;
   clearCelebration: () => void;
   goHome: () => void;
+  /** Wipe all saved progression (fresh start). Keeps lang + sound prefs. */
+  resetProgress: () => void;
 }
 
 export const useGameStore = create<GameState>()(
@@ -218,6 +220,25 @@ export const useGameStore = create<GameState>()(
           quizCountryId: null,
           quizAdvanced: false,
           knowledgeCountryId: null,
+        }),
+
+      // Clearing avatarId re-triggers the first-run character select — a
+      // clear "fresh start" signal. Language/sound prefs survive.
+      resetProgress: () =>
+        set({
+          collectedCountryIds: [],
+          advancedDoneIds: [],
+          points: 0,
+          xp: 0,
+          correctAnswers: 0,
+          bestPointing: null,
+          bestPointingWorld: null,
+          bestShape: null,
+          bestFlash: null,
+          dailyScores: {},
+          avatarId: null,
+          selectedCountryId: null,
+          lastCollectedId: null,
         }),
     }),
     {

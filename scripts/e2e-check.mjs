@@ -116,6 +116,38 @@ check(
 await page.screenshot({ path: `${shots}/5-knowledge.png` });
 await page.locator(".page-topbar .btn").last().click(); // back to map
 
+// --- country search panel: bilingual search, ✓ mark, fly-to opens the card ---
+await page.fill(".country-search-input", "日本");
+await page.waitForTimeout(300); // let React re-filter
+const jpRows = page.locator(".country-search-row");
+check("search finds 日本 (1 row)", (await jpRows.count()) === 1);
+check(
+  "search row shows collected ✓",
+  (await jpRows.first().innerText()).includes("✓"),
+);
+await jpRows.first().click();
+await page.waitForSelector(".country-card", { timeout: 5000 });
+check(
+  "search pick opens country card",
+  (await page.locator(".country-card").innerText()).includes("日本"),
+);
+await page.screenshot({ path: `${shots}/14-search.png` });
+await page.locator(".country-card-close").click();
+await page.fill(".country-search-input", "france");
+await page.waitForTimeout(300);
+check(
+  "search matches EN name too",
+  (await page.locator(".country-search-row").count()) === 1 &&
+    (await page.locator(".country-search-row").innerText()).includes("法國"),
+);
+await page.fill(".country-search-input", "");
+// The fly-to moved the camera; restore the world view for the pointing
+// game's geo→pixel projections below.
+await page.evaluate(() =>
+  window.__wqMap.jumpTo({ center: [30, 25], zoom: 1.6 }),
+);
+await page.waitForTimeout(400);
+
 // --- pointing game (classic): wrong guess must reveal the target in green ---
 await page.locator(".btn", { hasText: "經典" }).click();
 await page.waitForSelector(".pointing-hud");
@@ -196,6 +228,14 @@ check("codex shows advanced ⭐", jpTile.includes("⭐"));
 await page.screenshot({ path: `${shots}/13-codex-advanced.png` });
 await page.locator(".page-topbar .btn").click(); // back to map
 
+// --- advanced-challenge entry in the mode menu lists cleared Japan ---
+await page.locator(".explore-row:has-text('進階挑戰') .btn--primary").click();
+await page.waitForSelector(".advanced-picker");
+const pickerText = await page.locator(".advanced-picker").innerText();
+check("advanced picker lists 日本 as cleared", pickerText.includes("日本"));
+await page.screenshot({ path: `${shots}/15-advanced-picker.png` });
+await page.locator(".advanced-picker .country-card-close").click();
+
 // --- knowledge page shows climate + travel tips for extras-backed country ---
 await page.locator(".explore-row:has-text('圖鑑') .btn--primary").click();
 await page.waitForSelector(".codex-grid");
@@ -245,6 +285,32 @@ check(
   (await page.locator(".worldmap-banner h1").innerText()).includes("World Quest"),
 );
 await page.screenshot({ path: `${shots}/8-english.png` });
+
+// --- profile: share button present; reset needs a double confirm and wipes ---
+await page.locator(".avatar-chip").click();
+await page.waitForSelector(".profile-card");
+check(
+  "share button in profile",
+  (await page.locator(".profile-card .share-btn").count()) === 1,
+);
+await page.locator(".profile-card .btn--danger").click();
+await page.waitForSelector(".reset-confirm");
+check("reset asks to confirm", true);
+await page.screenshot({ path: `${shots}/16-reset-confirm.png` });
+await page.locator(".reset-confirm .btn--danger-solid").click();
+await page.waitForSelector(".avatar-grid"); // fresh start → character select
+check("reset reopens character select", true);
+check(
+  "reset wipes progress to 0",
+  (
+    await page
+      .locator(".collect-progress .collect-progress-row strong")
+      .first()
+      .innerText()
+  )
+    .trim()
+    .startsWith("0 /"),
+);
 
 await browser.close();
 console.log(fails.length ? `\nFAILED: ${fails.join(", ")}` : "\nall e2e checks passed ✓");

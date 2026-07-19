@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { COUNTRIES } from "../data/countries";
 import {
   avatarById,
@@ -6,6 +7,7 @@ import {
   LEVELS_PER_TIER,
 } from "../data/avatars";
 import { levelInfo } from "../lib/leveling";
+import { shareAchievement } from "../lib/shareImage";
 import { useGameStore } from "../store/gameStore";
 import { todayKey } from "../lib/rng";
 import { useT, L } from "../i18n";
@@ -30,6 +32,8 @@ export default function ProfileCard({ onClose, onChangeAvatar }: Props) {
   const bestShape = useGameStore((s) => s.bestShape);
   const bestFlash = useGameStore((s) => s.bestFlash);
   const todayScore = useGameStore((s) => s.dailyScores[todayKey()]);
+  const resetProgress = useGameStore((s) => s.resetProgress);
+  const [confirmReset, setConfirmReset] = useState(false);
 
   const info = levelInfo(xp);
   const tier = tierForLevel(info.level);
@@ -147,9 +151,47 @@ export default function ProfileCard({ onClose, onChangeAvatar }: Props) {
           </div>
         )}
 
-        <button className="btn btn--ghost btn--sm" onClick={onChangeAvatar}>
-          {t("change_avatar")}
-        </button>
+        <div className="profile-actions">
+          <button
+            className="btn btn--primary btn--sm share-btn"
+            onClick={() => void shareAchievement().catch(console.error)}
+          >
+            {t("share_btn")}
+          </button>
+          <button className="btn btn--ghost btn--sm" onClick={onChangeAvatar}>
+            {t("change_avatar")}
+          </button>
+        </div>
+
+        {confirmReset ? (
+          <div className="reset-confirm">
+            <p>{t("reset_warn")}</p>
+            <div className="reset-confirm-btns">
+              <button
+                className="btn btn--sm btn--danger-solid"
+                onClick={() => {
+                  resetProgress();
+                  onClose();
+                }}
+              >
+                {t("reset_confirm")}
+              </button>
+              <button
+                className="btn btn--ghost btn--sm"
+                onClick={() => setConfirmReset(false)}
+              >
+                {t("reset_cancel")}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            className="btn btn--ghost btn--sm btn--danger"
+            onClick={() => setConfirmReset(true)}
+          >
+            {t("reset_btn")}
+          </button>
+        )}
       </div>
     </div>
   );
